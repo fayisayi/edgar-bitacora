@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Edgar · bitácora</title>
+<meta name="description" content="Bitácora interactiva de «Edgar», novela corta de David Fayad. Tesis de la Maestría en Creación Literaria y Narrativas Digitales, Universidad Icesi.">
+<meta name="theme-color" content="#0F0F0D">
+<meta property="og:type" content="website"><meta property="og:title" content="Edgar · bitácora de una novela">
+<meta property="og:description" content="Bitácora interactiva de «Edgar», novela corta de David Fayad. Tesis de la Maestría en Creación Literaria y Narrativas Digitales, Universidad Icesi.">
+<meta property="og:image" content="assets/og.jpg"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230F0F0D'/%3E%3Ctext x='32' y='46' font-size='44' text-anchor='middle' fill='%23D8D3C4' font-family='serif'%3EE%3C/text%3E%3C/svg%3E">
+<link rel="preload" as="image" href="assets/teatro.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital@0;1&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<style>
+:root{--negro:#0F0F0D;--hueso:#D8D3C4;--ceniza:#8F8A7C;--oxido:#6E2B22;
+  --w:min(52vw,calc(52vh*2.125));--cy:36%;--titulo:'UnifrakturMaguntia','Old English Text MT',serif;--cuerpo:'Libre Baskerville',Georgia,serif}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--negro);color:var(--hueso);font-family:var(--cuerpo);overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:1px solid var(--hueso);outline-offset:4px}
+
+/* ——— fondo vivo: niebla, grano de película, parpadeo ——— */
+.niebla{position:fixed;inset:-25%;pointer-events:none;
+  background:radial-gradient(circle at 28% 38%,rgba(216,211,196,.07),transparent 38%),
+             radial-gradient(circle at 72% 66%,rgba(216,211,196,.06),transparent 42%);
+  animation:deriva 38s ease-in-out infinite alternate}
+@keyframes deriva{to{transform:translate(7%,-5%) scale(1.15)}}
+#grano{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:31;image-rendering:pixelated;opacity:.3}
+.parpadeo{position:fixed;inset:0;pointer-events:none;z-index:32;background:#000;opacity:0;animation:parp 11s steps(1) infinite}
+@keyframes parp{0%,100%{opacity:0}9%{opacity:.07}9.6%{opacity:0}47%{opacity:.1}47.5%{opacity:.03}48%{opacity:0}81%{opacity:.06}81.4%{opacity:0}}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:30;
+  background:radial-gradient(ellipse at 50% 55%,transparent 42%,rgba(5,5,4,.8) 100%)}
+
+.marca{position:absolute;left:0;right:0;top:calc(var(--cy) + var(--w)*.2353 + 1.6rem);text-align:center;z-index:5;pointer-events:none;transition:opacity .8s}
+.marca h1{font:400 clamp(2.8rem,5vw,4.4rem)/1 var(--titulo);text-shadow:0 0 24px rgba(216,211,196,.25),0 0 3px rgba(216,211,196,.45)}
+.marca p{margin-top:.8rem;font:.78rem var(--cuerpo);letter-spacing:.2em;color:var(--ceniza)}
+.abierto .marca{opacity:.5}
+.marca h1 button{font:inherit;color:inherit;text-shadow:inherit;pointer-events:auto;cursor:pointer;transition:text-shadow .4s}
+.marca h1 button:hover,.marca h1 button:focus-visible{text-shadow:0 0 30px rgba(216,211,196,.6),0 0 3px rgba(216,211,196,.8)}
+.stage{position:fixed;inset:0;overflow:hidden}
+
+/* ——— edificio flotante ——— */
+.edificio{position:absolute;left:50%;top:var(--cy);z-index:2;width:var(--w);aspect-ratio:1600/753;
+  display:block;line-height:0;transform:translate(-50%,-50%);animation:flota 11s ease-in-out infinite}
+@keyframes flota{50%{transform:translate(calc(-50% + 5px),calc(-50% - 11px))}}
+.edificio::before{content:'';position:absolute;inset:-70% -45%;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 52%,rgba(216,211,196,.15),rgba(216,211,196,.04) 50%,transparent 70%)}
+.edificio img{width:100%;height:100%;display:block;opacity:.95;
+  transition:opacity .9s}
+.edificio:hover img{opacity:1}
+.abierto .edificio img,.con-foto .edificio img{opacity:.27}
+.pista{position:absolute;bottom:80px;left:0;right:0;text-align:center;z-index:6;pointer-events:none;
+  font:.85rem var(--cuerpo);color:var(--ceniza);transition:opacity .6s}
+.visitado .pista{opacity:0}
+
+/* ——— rayos y salas (se mueven desde JS) ——— */
+.rayo{position:absolute;left:0;top:0;width:1000px;transform-origin:0 50%;z-index:4;pointer-events:none;visibility:hidden;will-change:transform,opacity;
+  background:linear-gradient(90deg,rgba(236,231,214,var(--al)),rgba(216,211,196,.12));box-shadow:0 0 9px 1px rgba(110,43,34,.7)}
+.sala{position:absolute;left:0;top:0;z-index:7;visibility:hidden;pointer-events:none;will-change:transform}
+.sala button{padding:.55rem .95rem;background:rgba(15,15,13,.88);white-space:nowrap;
+  font:1.05rem var(--cuerpo);transition:color .3s,text-shadow .3s}
+.sala button:hover,.sala button:focus-visible{color:#fff;text-shadow:0 0 14px rgba(216,211,196,.7)}
+
+/* ——— mancha de óxido (sala visitada) ——— */
+.sala button{position:relative;isolation:isolate}
+.sala button::before{content:'';position:absolute;inset:-10px -16px;z-index:-1;opacity:0;transition:opacity 1.6s;pointer-events:none;
+  background:radial-gradient(ellipse 55% 70% at var(--x1,30%) 60%,rgba(110,43,34,.6),transparent 72%),radial-gradient(ellipse 40% 55% at var(--x2,72%) 38%,rgba(84,28,21,.5),transparent 70%),radial-gradient(ellipse 22% 30% at 52% 92%,rgba(110,43,34,.4),transparent 70%)}
+.sala.visitada button::before{opacity:1}
+/* ——— lector del manuscrito ——— */
+.lector{height:100%;display:flex;flex-direction:column;position:relative;background:#13130F}
+.lbar{display:flex;gap:.2rem;align-items:center;padding:.3rem 1rem;font:.8rem var(--cuerpo);color:var(--ceniza)}
+.lbar button{padding:.5rem .7rem;color:var(--ceniza);transition:color .3s}.lbar button:hover:not(:disabled){color:var(--hueso)}
+.lbar button:disabled{opacity:.3;cursor:default}.lbar .sp{flex:1}
+.ltexto{flex:1;overflow:auto;padding:1.5rem 1.2rem 5rem}
+.ltexto article{max-width:37rem;margin:0 auto;font:1.06rem/1.85 var(--cuerpo)}
+.ltexto h3{font:400 2.8rem/1 var(--titulo);text-align:center;margin:1rem 0 2.4rem}
+.ltexto p{margin:0 0 1.1em;text-indent:1.4em}.ltexto p.d,.ltexto p.ev{text-indent:0}
+.ltexto p.ev{color:var(--ceniza);text-align:center;margin-top:3rem}
+.ltexto hr{border:0;height:1.6rem;margin:1rem 0;text-align:center}.ltexto hr::after{content:'· · ·';color:var(--ceniza);letter-spacing:.6em}
+.ltexto a.ir{color:var(--hueso);cursor:pointer;text-indent:0;background:linear-gradient(rgba(110,43,34,.7),rgba(110,43,34,.7)) 0 100%/100% 2px no-repeat;transition:background-size .3s}
+.ltexto a.ir:hover{background-size:100% 100%}
+.lindice{position:absolute;inset:0;background:#13130F;overflow:auto;padding:1.5rem;display:none;z-index:2}.lindice.on{display:block}
+.lindice ul{list-style:none;padding:0;max-width:26rem;margin:0 auto}
+.lindice button{display:block;width:100%;text-align:left;padding:.65rem .4rem;font:1rem var(--cuerpo);color:var(--hueso)}
+.lindice button.vacio{color:var(--ceniza)}.lindice button:hover{color:#fff}
+.lindice i{font-style:normal;color:#9b4a3d;margin-left:.6rem}
+.boton{display:inline-block;padding:.8rem 1.4rem;color:var(--hueso);text-decoration:none;background:rgba(110,43,34,.45);transition:background .3s}.boton:hover{background:rgba(110,43,34,.8)}
+.vacio small{display:block;margin-top:1rem;color:var(--ceniza);font-size:.8rem}
+
+/* ——— lector: aspecto propio ——— */
+.lector{background:transparent}
+.lbar{position:relative;letter-spacing:.14em;font-size:.9rem;text-transform:lowercase;gap:.4rem;padding:.4rem .8rem}
+.lbar button,.lbar .alt-pdf{min-height:48px;min-width:48px;padding:.6rem 1.1rem;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--ceniza);text-decoration:none;transition:color .3s}
+.lbar .alt-pdf:hover{color:var(--hueso)}
+.lbar #la,.lbar #ls{font-size:2rem;line-height:1;letter-spacing:0;padding:.2rem 1.2rem}
+.lbar #lc{font-size:.85rem;margin-right:.5rem}
+.lindice button{font-size:1.15rem;padding:1rem .6rem}
+.ltexto{position:relative;scrollbar-width:thin;scrollbar-color:#3a372f transparent}
+.ltexto article{font:1.08rem/1.95 var(--cuerpo);color:#cdc8b8;hyphens:auto}
+.ltexto h3{margin:2rem 0 3rem}
+.ltexto h3 small{display:block;font:.7rem var(--cuerpo);letter-spacing:.4em;color:var(--ceniza);margin-bottom:.6rem}
+.ltexto h3{font-size:6rem;line-height:.9;color:#e4dfcf}
+.ltexto h3+p:not(.dc):not(.cen)::first-letter{font:400 4.4rem/.78 var(--titulo);float:left;margin:.3rem .6rem 0 -.1rem;color:#e4dfcf}
+.ltexto .ci{font:400 2.7rem/.9 var(--titulo);color:#e4dfcf;vertical-align:-.12em}
+.ltexto .pri::first-letter{font:400 4.4rem/.78 var(--titulo);float:left;margin:.3rem .6rem 0 -.1rem;color:#e4dfcf}
+.ltexto .firma{text-indent:0;text-align:right;color:var(--ceniza);margin-top:2.2rem;letter-spacing:.1em}
+.mon-in{height:auto;margin:3.5rem auto 1rem;padding:0}
+.ltexto .sig{text-align:center;text-indent:0;margin:4rem 0 1rem}
+.ltexto .sig button{padding:.9rem 1.7rem;background:rgba(110,43,34,.45);color:var(--hueso);letter-spacing:.16em;font:.78rem var(--cuerpo);transition:background .3s}
+.ltexto .sig button:hover{background:rgba(110,43,34,.85)}
+/* ——— temas de sala ——— */
+.cuerpo{position:relative}
+.panel[data-tema=monitor]{--fondo:#0a0a09}
+.panel[data-tema=mesa]{--fondo:#0c0c0b}
+.panel[data-tema=mesa] .cuerpo{background-image:linear-gradient(rgba(216,211,196,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(216,211,196,.07) 1px,transparent 1px);background-size:32px 32px}
+.panel[data-tema=cuaderno],.panel[data-tema=collage]{--fondo:#0e0e0c}
+.mon{height:100%;display:grid;place-items:center;padding:1rem;position:relative}
+.monitor{position:relative;width:min(100%,calc((min(86vh,900px) - 150px)*1.684));aspect-ratio:640/380;border-radius:24px/18px;overflow:hidden;z-index:1;box-shadow:0 0 90px rgba(216,211,196,.3)}
+.mon .fuera{position:absolute;bottom:.5rem;left:0;right:0;text-align:center;font:.72rem var(--cuerpo);letter-spacing:.14em;color:var(--ceniza);text-decoration:none}
+.mon .fuera:hover{color:var(--hueso)}
+.gal{height:100%;overflow:auto;padding:2rem 2.4rem;display:flex;flex-wrap:wrap;gap:1.6rem;align-content:flex-start;justify-content:center}
+.gal .it{width:min(230px,42%);height:auto;cursor:zoom-in;transition:transform .4s;box-shadow:0 8px 20px rgba(0,0,0,.7)}
+.gal .it:hover{transform:scale(1.04) rotate(0)!important}
+.gal .hoja{aspect-ratio:3/4;background:#CFC7B0;cursor:default}
+.panel[data-tema=mesa] .gal .it{width:auto;max-width:44%;max-height:280px;box-shadow:none;filter:drop-shadow(0 8px 14px rgba(0,0,0,.6))}
+.zoom{position:absolute;inset:0;z-index:200;background:rgba(8,8,7,.985);display:grid;grid-template:100%/100%;place-items:center;overflow:hidden;z-index:5;cursor:zoom-out}
+.zoom figure{height:94%;max-width:94%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem}
+.zoom img{min-height:0;max-width:100%;object-fit:contain;box-shadow:0 0 60px rgba(0,0,0,.8)}
+.zoom figcaption{font:1.05rem/1.4 var(--cuerpo);letter-spacing:.04em;color:var(--hueso);text-align:center;max-width:36rem}
+.col{position:relative;height:100%;overflow:auto;isolation:isolate}
+.col img{position:absolute;box-shadow:0 6px 22px rgba(0,0,0,.75);cursor:zoom-in;transition:transform .4s}
+.col img:hover{transform:rotate(0) scale(1.07)!important;z-index:50}
+
+/* ——— fotografía ——— */
+.fotoc button{padding:0;background:none;line-height:0;cursor:pointer}
+.fotoc button::before{display:none}
+.fotoc img{display:block;width:min(24vw,290px);height:auto;filter:drop-shadow(0 12px 22px rgba(0,0,0,.75))}
+@media (max-width:720px){.fotoc img{width:min(60vw,250px)}}
+.pila{position:relative;height:100%;overflow:hidden;isolation:isolate}
+.pila .it{position:absolute;width:var(--w,min(30%,260px));height:auto;cursor:zoom-in;transition:transform .4s;box-shadow:0 8px 24px rgba(0,0,0,.75)}
+.pila .hoja{aspect-ratio:3/4;cursor:default}
+.pila .it:hover{transform:translate(-50%,-50%) rotate(0) scale(1.06)!important;z-index:99!important}
+.pila .it img{display:block;width:100%;height:auto}
+.cinta{position:absolute;top:-11px;width:78px;height:24px;background:rgba(216,211,196,.3);box-shadow:0 0 6px rgba(0,0,0,.35);pointer-events:none}
+@media (max-width:720px){.pila .it{width:var(--wm,min(46%,220px))}}
+.mapa{position:relative;height:100%;overflow:hidden}
+.mgen,.mz{position:absolute;left:0;top:0;display:block;will-change:transform;text-align:center}
+.mgen{width:min(44%,480px);z-index:1}
+.mz-img>img:first-child{display:block;width:100%;height:auto}
+.mgen .mz-img>img:first-child{transition:opacity .9s}
+.mapa.ab .mgen .mz-img>img:first-child{opacity:.5}
+.mt{display:block;margin-top:.7rem;font:.78rem/1.3 var(--cuerpo);letter-spacing:.16em;color:var(--ceniza);transition:color .3s}
+.mgen .mt{transform:scale(var(--inv,1));transform-origin:50% 0}
+.mgen:hover .mt,.mz:hover .mt,.mgen:focus-visible .mt,.mz:focus-visible .mt{color:var(--hueso)}
+.mz{width:min(21%,230px);z-index:3;visibility:hidden}
+.mz-img{position:relative;display:block}
+.mz-img{position:relative;display:block}
+.foto{position:absolute;right:-8%;bottom:calc(-10% + var(--i,0)*26%);width:34%;height:auto;aspect-ratio:16/10;object-fit:cover;box-shadow:0 6px 16px rgba(0,0,0,.7);transform:rotate(calc(4deg - var(--i,0)*9deg));cursor:zoom-in;transition:transform .3s}
+.foto:hover{transform:rotate(0) scale(1.12);z-index:5}
+.foto.ph,.zfoto.ph{background:rgba(143,138,124,.3)}
+.mrayo{position:absolute;left:0;top:0;width:1000px;height:1px;transform-origin:0 50%;z-index:2;visibility:hidden;pointer-events:none;will-change:transform;
+  background:linear-gradient(90deg,rgba(236,231,214,.9),rgba(216,211,196,.15));box-shadow:0 0 8px 1px rgba(110,43,34,.65)}
+.zw{position:relative;height:calc(100% - 3rem);width:fit-content;max-width:100%}
+.zw>img:first-child{height:100%;width:auto;max-width:100%;object-fit:contain;display:block}
+.zfoto{position:absolute;right:-4%;bottom:calc(-5% + var(--i,0)*21%);width:26%;height:auto;aspect-ratio:16/10;object-fit:cover;box-shadow:0 8px 24px rgba(0,0,0,.75);transform:rotate(calc(3deg - var(--i,0)*7deg));cursor:zoom-in}
+.zoom img.px{image-rendering:pixelated}
+@media (max-width:720px){.mgen{width:78%}.mz{width:38%}}
+.sala.fotoc button{max-width:none;white-space:nowrap;padding:0;line-height:0}
+.ltexto p.cen{text-indent:0;text-align:center;margin:.15em 0;letter-spacing:.05em}
+.ltexto .dedic h3{margin:3rem 0 2rem;font-size:1rem}
+.ltexto .dedic p.cen{margin:1.5rem 0;font-size:1.12em;color:#d8d3c4;letter-spacing:0}
+/* ——— lector: índice lateral y elecciones ——— */
+.lbar{text-transform:none}
+.lcuerpo{flex:1;min-height:0;display:flex;position:relative}
+.lcuerpo .ltexto{flex:1;min-width:0}
+@media (min-width:721px){.lindice{position:static;inset:auto;width:15rem;flex:none;z-index:auto;background:transparent;padding:.5rem .4rem 2rem 1rem}}
+.lindice button.act{color:#fff}
+.lindice i{font-style:normal;color:#9b4a3d;margin-left:.6rem}
+.ltexto .opcion{margin:1.5rem 0;text-indent:0}
+.ltexto .opcion a.ir{display:block;padding:1.05rem 1.3rem;color:#f2edde;text-decoration:none;cursor:pointer;
+  background:linear-gradient(90deg,#9b4a3d 0 3px,transparent 3px) 0 0/100% 100% no-repeat,rgba(110,43,34,.3);
+  animation:flota-op 7s ease-in-out infinite;animation-delay:calc(var(--k,0)*-1.6s);transition:background-color .3s}
+.ltexto .opcion a.ir:hover{background-color:rgba(110,43,34,.62);animation-play-state:paused}
+@keyframes flota-op{50%{transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.ltexto .opcion a.ir{animation:none}}
+/* ——— manual (booklet) ——— */
+.manual{position:absolute;right:max(14px,1.6%);bottom:12px;width:min(112px,22%);z-index:4;text-align:center;line-height:0}
+.manual img{display:block;width:80%;height:auto;margin:0 auto;box-shadow:0 6px 16px rgba(0,0,0,.7);transform:rotate(-4deg);transition:transform .3s}
+.manual:hover img,.manual:focus-visible img{transform:rotate(0) translateY(-3px)}
+.manual .mt{margin-top:.55rem;font-size:.62rem;letter-spacing:.08em;line-height:1.3}
+.manual:hover .mt,.manual:focus-visible .mt{color:var(--hueso)}
+.visor{position:absolute;inset:0;z-index:205;background:#0e0e0c;display:flex;flex-direction:column}
+.vbar{display:flex;align-items:center;gap:.4rem;padding:.4rem 1rem}
+.vbar h4{font:400 1.7rem/1 var(--titulo);color:var(--hueso)}.vbar .sp{flex:1}
+.vbar .alt-pdf,.vx{min-height:48px;min-width:48px;display:inline-flex;align-items:center;justify-content:center;color:var(--ceniza);font:.9rem var(--cuerpo);letter-spacing:.14em;text-decoration:none;transition:color .3s}
+.vx{font-size:1.7rem}.vbar .alt-pdf:hover,.vx:hover{color:var(--hueso)}
+.vpag{flex:1;min-height:0;display:flex;align-items:center;gap:.4rem;padding:0 .5rem}
+.vpag img{flex:1;min-width:0;height:100%;object-fit:contain}
+.vp{width:56px;height:96px;font-size:2.4rem;color:var(--ceniza);transition:color .3s}.vp:hover:not(:disabled){color:var(--hueso)}.vp:disabled{opacity:.25}
+.vn{text-align:center;padding:.5rem;font:.8rem var(--cuerpo);letter-spacing:.14em;color:var(--ceniza)}
+@media (max-width:720px){.manual{width:96px}.vp{width:38px}.vbar h4{font-size:1.4rem}}
+/* ——— pista discreta en «Edgar» (solo opacidad: no repinta) ——— */
+.marca h1 button{position:relative}
+.marca h1 button::after{content:'';position:absolute;inset:-35% -30%;pointer-events:none;opacity:0;
+  background:radial-gradient(closest-side,rgba(216,211,196,.2),transparent);animation:latido 5s ease-in-out 9s 3}
+@keyframes latido{50%{opacity:1}}
+.nombre-visto .marca h1 button::after,.en-sala .marca h1 button::after{display:none}
+@media (prefers-reduced-motion:reduce){.marca h1 button::after{animation:none}}
+/* ——— créditos y tamaño de letra ——— */
+.cred{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:max(22px,env(safe-area-inset-bottom));z-index:45;padding:.7rem .5rem;
+  font:.72rem var(--cuerpo);letter-spacing:.2em;color:var(--ceniza);opacity:.75;transition:color .3s,opacity .3s}
+.cred:hover,.cred:focus-visible{color:var(--hueso);opacity:1}
+.ltexto article{font-size:var(--tam,1.08rem)}
+.lbar #tmenos,.lbar #tmas{font-family:var(--cuerpo);letter-spacing:0}
+.lbar #tmenos{font-size:.85rem}.lbar #tmas{font-size:1.3rem}
+.cr{text-indent:0;margin:0 0 1.8rem;text-align:center}
+.cr span{display:block;font:.72rem var(--cuerpo);letter-spacing:.24em;color:var(--ceniza);margin-bottom:.35rem}
+/* ——— rendimiento ——— */
+.en-sala .niebla,.en-sala #grano,.en-sala .parpadeo,.en-sala .vignette{display:none}
+.en-sala .edificio{animation-play-state:paused}
+.niebla,.edificio{will-change:transform}
+
+/* ——— reproductor ——— */
+.musica{position:fixed;bottom:max(16px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:2px;
+  padding:3px;background:rgba(15,15,13,.7)}
+.musica button{width:36px;height:36px;display:grid;place-items:center;color:var(--ceniza);transition:color .3s}
+.musica button:hover{color:var(--hueso)}
+.musica svg{width:15px;height:15px;fill:currentColor}
+.musica .tp{max-width:0;overflow:hidden;white-space:nowrap;font:.75rem var(--cuerpo);color:var(--ceniza);transition:max-width .5s,padding .5s}
+.musica:hover .tp,.musica:focus-within .tp{max-width:240px;padding:0 .6rem}
+.musica input{width:0;opacity:0;transition:width .4s,opacity .4s;accent-color:var(--hueso)}
+.musica:hover input,.musica:focus-within input{width:70px;opacity:1}
+#yt{position:fixed;left:-9999px;top:0}
+@media (hover:none){.musica input{display:none}}
+
+/* ——— modal ——— */
+.modal{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:16px 16px 80px;background:rgba(8,8,7,.9);opacity:0;transition:opacity .4s}
+.modal.on{display:grid}.modal.vis{opacity:1}
+.panel{position:relative;width:min(1100px,92vw);height:min(calc(100vh - 112px),900px);height:min(calc(100dvh - 112px),900px);display:flex;flex-direction:column;padding:14px;isolation:isolate;transform:translateY(10px);transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.vis .panel{transform:none}
+.panel::before{content:'';position:absolute;inset:0;z-index:-1;background:var(--fondo,#13130F);clip-path:var(--rasgado,none)}
+.panel header{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem .6rem}
+.panel h2{font:400 2.1rem/1.1 var(--titulo)}
+.cerrar{width:44px;height:44px;font-size:1.7rem;color:var(--ceniza);line-height:1}
+.cerrar:hover{color:var(--hueso)}
+.cuerpo{flex:1;min-height:0}
+.cuerpo iframe{width:100%;height:100%;border:0;background:#1b1b17}
+.vacio{height:100%;display:grid;place-content:center;padding:2rem;text-align:center;font:1rem var(--cuerpo);color:var(--ceniza)}
+.alt{display:block;text-align:center;padding:.7rem;font:.85rem var(--cuerpo);color:var(--ceniza);text-decoration:none}
+.alt:hover{color:var(--hueso)}
+
+@media (max-width:720px){
+  :root{--w:84vw;--cy:33%}
+  .marca h1{font-size:3.2rem}
+  .marca p{font-size:.75rem;letter-spacing:.14em}
+  .sala button{font-size:1rem;padding:.65rem .8rem;white-space:normal;max-width:10.5rem;line-height:1.3}
+  .lbar{flex-wrap:wrap;gap:.1rem}
+  .lbar button,.lbar .alt-pdf{padding:.6rem .8rem}
+  .modal{padding:0 0 76px}
+  .panel{width:100vw;height:100%}
+  .musica .tp{display:none}
+}
+@media (prefers-reduced-motion:reduce){.edificio,.niebla,.parpadeo{animation:none}}
+</style>
+</head>
+<body>
+<noscript><p style="color:#8F8A7C;text-align:center;margin-top:40vh;font-family:Georgia,serif">Esta bitácora necesita JavaScript para funcionar.</p></noscript>
+<div class="niebla"></div>
+<main class="stage" id="stage">
+  <header class="marca"><h1><button id="nombre" aria-expanded="false" aria-label="Edgar: ver fotografía">Edgar</button></h1><p>Bitácora de una novela</p></header>
+  <div id="capa"></div>
+  <button class="edificio" id="edificio" aria-expanded="false" aria-label="Abrir el menú de la bitácora">
+    <img id="img" src="assets/teatro.webp" alt="Fachada del teatro San Fernando, en blanco y negro, con la cartelera «La sombra del vicio»">
+  </button>
+  <p class="pista">toca el edificio</p>
+</main>
+<canvas id="grano" aria-hidden="true"></canvas><div class="parpadeo"></div><div class="vignette"></div>
+
+<button class="cred" id="cred">créditos</button>
+<div class="musica" id="musica" role="group" aria-label="Música de fondo">
+  <button id="prev" aria-label="Pista anterior"><svg viewBox="0 0 16 16"><path d="M3 2h2v12H3zM14 2v12L6 8z"/></svg></button>
+  <button id="play" aria-label="Reproducir música"><svg viewBox="0 0 16 16" id="ico"><path d="M4 2l10 6-10 6z"/></svg></button>
+  <button id="next" aria-label="Pista siguiente"><svg viewBox="0 0 16 16"><path d="M11 2h2v12h-2zM2 2l8 6-8 6z"/></svg></button>
+  <button id="sfxb" aria-label="Silenciar efectos" aria-pressed="false"><svg viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2z"/><path id="ondas" d="M11 5.5a3.5 3.5 0 010 5M12.8 3.8a6 6 0 010 8.4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></button>
+  <span class="tp" id="tp"></span>
+  <input type="range" id="vol" min="0" max="100" value="40" aria-label="Volumen">
+</div>
+<div id="yt"></div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <div class="panel">
+    <header><h2 id="mt"></h2><button class="cerrar" id="cerrar" aria-label="Cerrar">×</button></header>
+    <div class="cuerpo" id="mc"></div>
+  </div>
+</div>
+
+<script>
+/* ═══ CONFIGURACIÓN ═══ */
+const PLAYLIST_ID = 'PLGWqH5MaDtDc';          // lo que va después de list= y antes de &si=
+const ORIGEN = {x:.49, y:.52};                 // de dónde salen los rayos, dentro de la imagen
+const SECCIONES = [
+  {id:'manuscrito', nombre:'Manuscrito',         lector:true, pdf:'assets/Edgar_manuscrito.pdf', tema:'lectura'},
+  {id:'porque',     nombre:'¿Qué es esto?', tema:'monitor', embed:'', enlace:'https://fayadgames.itch.io/por-qu-hacer-esto',   // Bitsy: pega en embed la URL de itch.io y el juego aparece bajo el texto
+    texto:[
+      'Esta bitácora narra de manera inconexa el camino para escribir este libro. Una novela corta, provisionalmente titulada “Edgar”. Esta historia nació hace unos diez años, inicialmente como la idea de narrar vivencias de mi adolescencia y la adolescencia de mi papá en Cali, de un amor particular por El Atravesado, una historia personal con la decadencia del teatro San Fernando y la necesidad de exorcizar el fantasma de mi tío Edgar, desaparecido desde 1986 en la frontera con Ecuador por pertenecer al M-19.',
+      'Esta historia primero fue un documento de diseño para un videojuego narrativo y un montón de apuntes en mis libretas. Luego, en el marco de la Maestría en Creación Literaria y Narrativas Digitales quiso existir como un guion para una historia interactiva, y finalmente, me llevó a rendirme con gusto ante la escritura de ficción en un formato más tradicional, una de mis pasiones más duraderas.',
+      'Aun así, esta es una novela que fue (y sigue siendo en espíritu) un videojuego, escrita por alguien que se identifica primero como diseñador de juegos que como escritor. Intenté dentro del afán de escribirla preservar en ella uno que otro principio de la exploración del espacio, la interacción con objetos y la agencia narrativa propia de los videojuegos.',
+      'Gracias por leerla.'],
+    firma:'David Fayad — 2026'},
+  {id:'experim',    nombre:'Experimentación interactiva',    embed:'https://itch.io/embed-upload/17721607?color=333333', enlace:'https://fayadgames.itch.io/edgar-test', tema:'monitor'},
+  {id:'planos',     nombre:'Planos del teatro',  mapa:true, tema:'mesa',
+    general:{src:'assets/planos/teatro.webp',titulo:'Teatro San Fernando',foto:'assets/planos/foto-exterior.png'},
+    zonas:[   // foto: una ruta o una lista de rutas (vacío = espacio reservado)
+      {src:'assets/planos/proyecciones.webp',titulo:'Sala de proyecciones',foto:'assets/planos/foto-proyecciones.png'},
+      {src:'assets/planos/callejon.webp',titulo:'Callejón',foto:'assets/planos/foto-callejon.png'},
+      {src:'assets/planos/lobby.webp',titulo:'Lobby y sala',foto:['assets/planos/foto-lobby.png','assets/planos/foto-interior.png']}],
+    manual:{titulo:'Manual de instrucciones',cover:'assets/manual/portada.webp',pdf:'assets/manual/Booklet_Edgar.pdf',
+      paginas:['assets/manual/p1.webp','assets/manual/p2.webp','assets/manual/p3.webp','assets/manual/p4.webp','assets/manual/p5.webp','assets/manual/p6.webp','assets/manual/p7.webp']}},
+  {id:'cuaderno',   nombre:'Mis cuadernos',           galeria:true, tema:'cuaderno', items:[   // src = imagen grande, thumb = miniatura, titulo opcional
+    {src:'assets/cuaderno/cuaderno-01.jpg',thumb:'assets/cuaderno/cuaderno-01-t.jpg',alt:'Página 1 del cuaderno'},
+    {src:'assets/cuaderno/cuaderno-02.jpg',thumb:'assets/cuaderno/cuaderno-02-t.jpg',alt:'Página 2 del cuaderno'},
+    {src:'assets/cuaderno/cuaderno-03.jpg',thumb:'assets/cuaderno/cuaderno-03-t.jpg',alt:'Página 3 del cuaderno'},
+    {src:'assets/cuaderno/cuaderno-04.jpg',thumb:'assets/cuaderno/cuaderno-04-t.jpg',alt:'Página 4 del cuaderno'},
+    {src:'assets/cuaderno/cuaderno-05.jpg',thumb:'assets/cuaderno/cuaderno-05-t.jpg',alt:'Página 5 del cuaderno'},
+    {src:'assets/cuaderno/cuaderno-06.jpg',thumb:'assets/cuaderno/cuaderno-06-t.jpg',alt:'Página 6 del cuaderno'},
+    {src:'assets/cuaderno/cuaderno-07.jpg',thumb:'assets/cuaderno/cuaderno-07-t.jpg',alt:'Página 7 del cuaderno'},
+    {src:'assets/cuaderno/cuaderno-08.jpg',thumb:'assets/cuaderno/cuaderno-08-t.jpg',alt:'Página 8 del cuaderno'},
+    {src:'assets/cuaderno/cuaderno-09.jpg',thumb:'assets/cuaderno/cuaderno-09-t.jpg',alt:'Página 9 del cuaderno'},
+    {src:'assets/cuaderno/cuaderno-10.jpg',thumb:'assets/cuaderno/cuaderno-10-t.jpg',alt:'Página 10 del cuaderno'}
+  ]},
+  {id:'sensacion',  nombre:'La sensación',       arena:'edgar-dlm8nyl06y0', embed:'https://www.are.na/david-fayad/edgar-dlm8nyl06y0/embed', enlace:'https://www.are.na/david-fayad/edgar-dlm8nyl06y0', tema:'collage'}
+];
+/* Disposición irregular: posición de cada sala respecto al centro (fracciones de ancho, alto) */
+const POS_PC  = [[-.30,-.20],[.27,-.27],[-.36,.06],[.34,.12],[-.19,.36],[.16,.34]];
+const POS_MOV = [[-.20,-.27],[.22,-.18],[-.17,-.15],[.20,.28],[-.22,.37],[.12,.47]];
+const INICIO = [46,66,54,62,50,72];            // distancia (px) del centro donde nace cada rayo
+const GROSOR = [1,1.5,1,2,1,1.5], ALFA = [.95,.7,.85,1,.6,.8];
+/* ═════════════════════ */
+
+const $ = s => document.querySelector(s);
+const stage=$('#stage'), img=$('#img'), btn=$('#edificio'), capa=$('#capa');
+const ls=(k,v)=>{ try{ if(v===undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k,JSON.stringify(v)); }catch(e){ return null; } };
+const TAMS=[.95,1.08,1.22,1.38,1.55]; let ti=ls('edgar-tam'); ti=Number.isInteger(ti)&&ti>=0&&ti<TAMS.length?ti:1;
+const aplicaTam=()=>document.documentElement.style.setProperty('--tam',TAMS[ti]+'rem'); aplicaTam();
+const visitadas=new Set(ls('edgar-visitadas')||[]);
+let sfx=true; const snd={};
+function tocar(n){ if(!sfx) return; try{ const a=snd[n]??=new Audio('assets/'+n+'.wav'); a.volume=.5; a.currentTime=0; a.play().catch(()=>{}); }catch(e){} }
+const quieto = matchMedia('(prefers-reduced-motion:reduce)').matches;
+let abierto=false, musicaIniciada=false, tCambio=0, raf=0, previo=0;
+
+/* ——— rayos (canvas) y salas flotantes ——— */
+const CREDITOS = [   // [rol, texto]: edita o añade líneas
+  ['textos e ilustraciones','David Fayad'],
+  ['tesis','Presentada para optar por el título de Magíster en Creación Literaria y Narrativas Digitales<br>Universidad Icesi · Cali · 2026'],
+  ['asesora de tesis','Gloria Susana Esquivel'],
+  ['sitio web','Creado utilizando Claude de Anthropic'],
+  ['fotografías','De archivo personal'],
+  ['tipografías','UnifrakturMaguntia y Libre Baskerville'],
+  ['derechos','Todos los derechos de las imágenes de referencia en la sección “La sensación” y de la música de ambientación pertenecen a sus autores originales']];
+const FOTO={x:.5,y:.3}, FOTO_M={x:.5,y:.27};               // dónde flota la fotografía (fracción de la pantalla)
+const items = SECCIONES.map((s,i)=>{
+  const sala=document.createElement('div'); sala.className='sala'+(visitadas.has(s.id)?' visitada':'');
+  sala.style.setProperty('--x1',(20+Math.random()*30|0)+'%'); sala.style.setProperty('--x2',(55+Math.random()*30|0)+'%');
+  sala.innerHTML=`<button data-id="${s.id}">${s.nombre}</button>`;
+  const rayo=document.createElement('div'); rayo.className='rayo'; rayo.style.cssText=`height:${GROSOR[i]}px;--al:${ALFA[i]}`;
+  capa.append(rayo,sala); return {sala,rayo,p:0};
+});
+const fotoEl=document.createElement('div'); fotoEl.className='sala fotoc';
+fotoEl.innerHTML='<button aria-label="Cerrar fotografía"><img src="assets/edgar.webp" alt="Cédula de ciudadanía de Edgar Fayad Sierra"></button>';
+const fotoRayo=document.createElement('div'); fotoRayo.className='rayo'; fotoRayo.style.cssText=`height:${GROSOR[0]}px;--al:${ALFA[0]}`;
+capa.append(fotoRayo,fotoEl);
+const todos=[...items,{sala:fotoEl,rayo:fotoRayo,p:0,foto:true}]; let fotoAb=false;
+const ease = p => 1-Math.pow(1-p,3), body=document.body;
+function arrancar(){ if(!raf){ previo=performance.now(); raf=requestAnimationFrame(frame); } }
+function frame(now){
+  if(body.classList.contains('en-sala')||document.hidden){ raf=0; return; }
+  const dt=Math.min(.05,(now-previo)/1000||.016); previo=now;
+  const r=img.getBoundingClientRect(), W=innerWidth, H=innerHeight, t=now/1000, rn=$('#nombre').getBoundingClientRect(), FT=W<=720?FOTO_M:FOTO;
+  const cx=r.left+r.width*ORIGEN.x, cy=r.top+r.height*ORIGEN.y;
+  const pos=W<=720?POS_MOV:POS_PC, A=quieto?0:(W<=720?5:8); let vivo=false;
+  todos.forEach((it,i)=>{
+    const meta=it.foto?fotoAb:abierto, k=it.foto?0:i;
+    if(now>=tCambio+(it.foto?0:i*80)) it.p=Math.min(1,Math.max(0,it.p+(meta?1:-1)*dt/.9));
+    if(it.p>0||meta) vivo=true;
+    const ox=it.foto?rn.left+rn.width/2:cx, oy=it.foto?rn.top+rn.height*.2:cy, ini=it.foto?10:INICIO[k];
+    const e=ease(it.p), bx=it.foto?W*FT.x:Math.min(W-70,Math.max(70,cx+pos[i][0]*W)), by=it.foto?H*FT.y:cy+pos[i][1]*H;
+    const lx=ox+(bx-ox)*e+Math.sin(t*(.5+i*.07)+i*2)*A*e, ly=oy+(by-oy)*e+Math.cos(t*(.4+i*.05)+i)*A*1.2*e;
+    const d=Math.hypot(bx-ox,by-oy), sx=ox+(bx-ox)/d*ini, sy=oy+(by-oy)/d*ini, op=Math.min(1,it.p*1.6);
+    const len=Math.hypot(lx-sx,ly-sy), ok=it.p>0&&Math.hypot(lx-ox,ly-oy)>ini, rs=it.rayo.style;
+    rs.visibility=ok?'visible':'hidden'; rs.opacity=op;
+    if(ok) rs.transform=`translate(${sx}px,${sy}px) rotate(${Math.atan2(ly-sy,lx-sx)}rad) scaleX(${len/1000})`;
+    const st=it.sala.style, vis=it.p>0;
+    st.visibility=vis?'visible':'hidden'; st.opacity=Math.max(0,(it.p-.35)/.65); st.pointerEvents=it.p>.8?'auto':'none';
+    st.transform=`translate(${lx}px,${ly}px) translate(-50%,-50%)`+(it.foto?` rotate(${Math.sin(t*.35+3)*1.3*e}deg)`:'');
+  });
+  raf = vivo ? requestAnimationFrame(frame) : 0;
+}
+function alternar(v){
+  abierto = v ?? !abierto; tCambio=performance.now();
+  if(abierto&&fotoAb) cierraFoto();
+  stage.classList.toggle('abierto',abierto); stage.classList.add('visitado');
+  btn.setAttribute('aria-expanded',abierto);
+  arrancar();
+  if(abierto) tocar('abrir');
+  if(abierto && !musicaIniciada){ musicaIniciada=true; reproducir(true); }
+}
+function cierraFoto(){ fotoAb=false; stage.classList.remove('con-foto'); $('#nombre').setAttribute('aria-expanded',false); }
+function alternarFoto(v){
+  const abre=v??!fotoAb; if(abre&&abierto) alternar(false);
+  fotoAb=abre; tCambio=performance.now(); stage.classList.toggle('con-foto',fotoAb); stage.classList.add('visitado');
+  $('#nombre').setAttribute('aria-expanded',fotoAb); arrancar();
+  if(fotoAb){ tocar('abrir'); if(!musicaIniciada){ musicaIniciada=true; reproducir(true); } }
+}
+$('#nombre').addEventListener('click',()=>{ document.body.classList.add('nombre-visto'); alternarFoto(); });
+$('#cred').addEventListener('click',()=>abrir({id:'creditos',nombre:'Créditos',creditos:true}));
+fotoEl.addEventListener('click',()=>alternarFoto(false));
+btn.addEventListener('click',()=>alternar());
+stage.addEventListener('click',e=>{ if(abierto && !e.target.closest('.sala,.edificio')) alternar(false); if(fotoAb && !e.target.closest('.sala,#nombre,.edificio')) alternarFoto(false); });
+
+/* ——— modal ——— */
+const modal=$('#modal'), cuerpo=$('#mc'); let foco;
+capa.addEventListener('click',e=>{ const b=e.target.closest('button[data-id]'); if(b) abrir(SECCIONES.find(s=>s.id===b.dataset.id)); });
+let salaAct='';
+function desgarre(){   // contorno irregular, distinto cada vez
+  const R=Math.random, N=innerWidth<=720?26:44, ph=R()*6, pts=[];
+  const j=i=>Math.min(12,Math.max(0,Math.sin(i*.4+ph)*2.5+2.5+(R()<.1?R()*8:R()*3.2)))|0;
+  for(let i=0;i<=N;i++) pts.push(`${i/N*100}% ${j(i)}px`);
+  for(let i=1;i<=N;i++) pts.push(`calc(100% - ${j(i+9)}px) ${i/N*100}%`);
+  for(let i=N-1;i>=0;i--) pts.push(`${i/N*100}% calc(100% - ${j(i+19)}px)`);
+  for(let i=N-1;i>=1;i--) pts.push(`${j(i+29)}px ${i/N*100}%`);
+  return 'polygon('+pts.join(',')+')';
+}
+function fotosEn(w,foto,cls,onclick){   // foto: undefined = nada · '' = reservado · ruta · lista de rutas
+  if(foto===undefined) return;
+  const l=Array.isArray(foto)?foto:[foto];
+  l.forEach((u,i)=>{ const p=document.createElement(u?'img':'span'); p.className=cls+(u?'':' ph'); p.style.setProperty('--i',i); if(u){ p.src=u; p.alt=''; if(onclick) p.onclick=e=>{ e.stopPropagation(); onclick(u); }; } w.append(p); });
+}
+function zoom(src,t,foto,px){
+  const z=document.createElement('div'); z.className='zoom'; const f=document.createElement('figure'), w=document.createElement('div'), i=document.createElement('img');
+  w.className='zw'; i.src=src; i.alt=t||''; if(px) i.className='px'; w.append(i); fotosEn(w,foto,'zfoto',u=>zoom(u,t,undefined,true));
+  f.append(w); if(t){ const c=document.createElement('figcaption'); c.textContent=t; f.append(c); } z.append(f); z.onclick=()=>z.remove(); cuerpo.append(z);
+}
+function montarCreditos(){
+  cuerpo.innerHTML='<div class="lector"><div class="ltexto"><article>'+CREDITOS.map(([r,n])=>`<p class="cr"><span>${r}</span>${n}</p>`).join('')+'</article></div></div>';
+}
+function montarTexto(s){
+  const juego=s.embed?`<div class="mon mon-in"><div class="monitor"><iframe src="${s.embed}" title="${s.nombre}" allowfullscreen allow="fullscreen; autoplay"></iframe></div></div>`:'';
+  cuerpo.innerHTML=`<div class="lector"><div class="ltexto"><article>${s.texto.map((t,i)=>`<p${i===0?' class="pri"':''}>${t}</p>`).join('')}<p class="firma">${s.firma||''}</p></article>${juego}</div></div>`;
+}
+function visor(m){
+  let i=0; const v=document.createElement('div'); v.className='visor';
+  v.innerHTML=`<div class="vbar"><h4>${m.titulo}</h4><span class="sp"></span><a class="alt-pdf" href="${m.pdf}" target="_blank" rel="noopener">PDF</a><button class="vx" aria-label="Cerrar el manual">×</button></div><div class="vpag"><button class="vp" id="vant" aria-label="Página anterior">‹</button><img alt=""><button class="vp" id="vsig" aria-label="Página siguiente">›</button></div><div class="vn"></div>`;
+  const im=v.querySelector('img'), n=v.querySelector('.vn'), a=v.querySelector('#vant'), g=v.querySelector('#vsig');
+  const ir=k=>{ i=Math.min(m.paginas.length-1,Math.max(0,k)); im.src=m.paginas[i]; im.alt=m.titulo+', página '+(i+1); n.textContent=(i+1)+' / '+m.paginas.length; a.disabled=i===0; g.disabled=i===m.paginas.length-1; };
+  a.onclick=()=>ir(i-1); g.onclick=()=>ir(i+1); v.querySelector('.vx').onclick=()=>v.remove(); ir(0); cuerpo.append(v); v.querySelector('.vx').focus();
+}
+function montarPlanos(s){
+  const PD={c0:[.5,.46],c1:[.5,.40],sc:.62,z:[[.17,.32],[.84,.40],[.5,.79]]}, PM={c0:[.5,.45],c1:[.5,.22],sc:.55,z:[[.27,.46],[.73,.60],[.5,.83]]}, INI=[54,70,62];
+  cuerpo.innerHTML=`<div class="mapa"><button class="mgen" aria-expanded="false"><span class="mz-img"><img src="${s.general.src}" alt="${s.general.titulo}"></span><span class="mt">${s.general.titulo}</span></button></div>`;
+  const mp=cuerpo.firstChild, bg=mp.firstChild; let ab=false, p=0, previo=0;
+  if(s.manual){ const bk=document.createElement('button'); bk.className='manual'; bk.setAttribute('aria-label',s.manual.titulo); bk.innerHTML=`<img src="${s.manual.cover}" alt=""><span class="mt">${s.manual.titulo}</span>`; bk.onclick=()=>visor(s.manual); mp.append(bk); }
+  fotosEn(bg.firstChild,s.general.foto||'','foto',u=>zoom(u,s.general.titulo,undefined,true));
+  const zs=s.zonas.map((z,i)=>{
+    const rayo=document.createElement('div'); rayo.className='mrayo';
+    const box=document.createElement('button'); box.className='mz'; box.setAttribute('aria-label',z.titulo);
+    box.innerHTML=`<span class="mz-img"><img src="${z.src}" alt=""></span><span class="mt">${z.titulo}</span>`;
+    fotosEn(box.firstChild,z.foto||'','foto',u=>zoom(u,z.titulo,undefined,true));
+    box.onclick=()=>zoom(z.src,z.titulo,z.foto||''); mp.append(rayo,box); return {rayo,box};
+  });
+  bg.onclick=()=>{ ab=!ab; mp.classList.toggle('ab',ab); bg.setAttribute('aria-expanded',ab); tocar('sala'); };
+  function frame(now){
+    if(!mp.isConnected) return;
+    const dt=Math.min(.05,(now-previo)/1000||.016); previo=now;
+    const W=mp.clientWidth, H=mp.clientHeight, t=now/1000, P=innerWidth<=720?PM:PD;
+    p=Math.min(1,Math.max(0,p+(ab?1:-1)*dt/.9)); const e=1-Math.pow(1-p,3), A=quieto?0:8;
+    const cx=(P.c0[0]+(P.c1[0]-P.c0[0])*e)*W, cy=(P.c0[1]+(P.c1[1]-P.c0[1])*e)*H+(quieto?0:Math.sin(t*.5)*5);
+    const sc=1+(P.sc-1)*e; bg.style.transform=`translate(${cx}px,${cy}px) translate(-50%,-50%) scale(${sc})`; bg.style.setProperty('--inv',1/sc);
+    zs.forEach((o,i)=>{
+      const tx=P.z[i][0]*W, ty=P.z[i][1]*H, lx=cx+(tx-cx)*e+Math.sin(t*(.5+i*.09)+i*2)*A*e, ly=cy+(ty-cy)*e+Math.cos(t*(.42+i*.06)+i)*A*1.2*e;
+      const d=Math.hypot(tx-cx,ty-cy)||1, sx=cx+(tx-cx)/d*INI[i], sy=cy+(ty-cy)/d*INI[i], len=Math.max(0,Math.hypot(lx-sx,ly-sy)), vis=p>0;
+      const bs=o.box.style, rs=o.rayo.style; bs.visibility=rs.visibility=vis?'visible':'hidden';
+      bs.opacity=Math.max(0,(p-.3)/.7); rs.opacity=Math.min(1,p*1.6); bs.pointerEvents=p>.8?'auto':'none';
+      bs.transform=`translate(${lx}px,${ly}px) translate(-50%,-50%) rotate(${Math.sin(t*.3+i)*1.2*e}deg)`;
+      rs.transform=`translate(${sx}px,${sy}px) rotate(${Math.atan2(ly-sy,lx-sx)}rad) scaleX(${len/1000})`;
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+function galeria(s){
+  const cu=s.id==='cuaderno'; let l=s.items||[];
+  if(!l.length&&cu) l=Array.from({length:6},()=>({ph:1}));
+  if(!l.length){ cuerpo.innerHTML='<div class="vacio">Esta sala todavía está cerrada.</div>'; return; }
+  const R=i=>{ const x=Math.sin(i*91.7+12.3)*43758.5453; return x-Math.floor(x); }, n=l.length, tonos=['#CFC7B0','#C4BBA2','#D4CDB9'];
+  cuerpo.innerHTML='<div class="'+(cu?'pila':'gal')+'"></div>'; const g=cuerpo.firstChild;
+  if(cu){ const k=n>6; g.style.setProperty('--w',k?'min(23%,200px)':'min(30%,260px)'); g.style.setProperty('--wm',k?'min(36%,150px)':'min(46%,220px)'); }
+  l.forEach((it,i)=>{
+    if(cu){ const kx=n>6?32:26, ky=n>6?30:24, a=i*2.4+.5, r=Math.sqrt(i+.6)/Math.sqrt(n+.6), w=document.createElement('div'); w.className='it'+(it.ph?' hoja':'');
+      w.style.cssText=`left:${50+Math.cos(a)*r*kx+(R(i)-.5)*6}%;top:${50+Math.sin(a)*r*ky+(R(i+7)-.5)*6}%;z-index:${(R(i+3)*n)|0};transform:translate(-50%,-50%) rotate(${(R(i+3)-.5)*30}deg)`+(it.ph?`;background:${tonos[i%3]}`:'');
+      if(!it.ph){ const im=document.createElement('img'); im.src=it.thumb||it.src; im.alt=it.alt||''; im.loading='lazy'; im.decoding='async'; w.append(im); w.onclick=()=>zoom(it.src,it.titulo||''); }
+      if(R(i+11)>.3){ const c=document.createElement('span'); c.className='cinta'; c.style.cssText=`left:${30+R(i+5)*40}%;transform:translateX(-50%) rotate(${(R(i+2)-.5)*26}deg)`; w.append(c); }
+      g.append(w); }
+    else { const e=document.createElement('img'); e.className='it'; e.style.transform='none'; e.src=it.src; e.alt=it.alt||''; e.loading='lazy'; e.onclick=()=>zoom(it.src,it.titulo||it.alt); g.append(e); }
+  });
+}
+async function collage(s){
+  const R=i=>{ const x=Math.sin(i*127.1+311.7)*43758.5453; return x-Math.floor(x); }, id=s.id;
+  cuerpo.innerHTML='';
+  try{
+    const r=await fetch('https://api.are.na/v2/channels/'+s.arena+'/contents?per=100'); if(!r.ok) throw 0;
+    const d=await r.json(); if(salaAct!==id) return;
+    const im=(d.contents||[]).filter(b=>b.image).map(b=>({t:(b.image.display||b.image.large||b.image.original||{}).url,f:(b.image.large||b.image.original||b.image.display||{}).url,n:(b.title||'').trim()})).filter(o=>o.t);
+    if(!im.length){ cuerpo.innerHTML=`<div class="vacio"><div>El tablero está vacío por ahora.<small><a class="boton" href="${s.enlace}" target="_blank" rel="noopener">Abrir en Are.na</a></small></div></div>`; return; }
+    const W=Math.min(innerWidth*.92,1100)-40, n=im.length, cols=Math.max(2,Math.round(Math.sqrt(n*1.5))), cw=W/cols, iw=cw*1.3, ch=cw*1.05, rows=Math.ceil(n/cols);
+    cuerpo.innerHTML='<div class="col"><div style="position:relative;height:'+(rows*ch+iw)+'px"></div></div>'; const c=cuerpo.querySelector('.col>div');
+    im.forEach((u,i)=>{ const e=document.createElement('img'); e.src=u.t; e.loading='lazy'; e.decoding='async'; e.alt='';
+      e.style.cssText=`width:${iw}px;left:${20+(i%cols)*cw+R(i)*cw*.3}px;top:${20+(i/cols|0)*ch+R(i+50)*ch*.3}px;transform:rotate(${(R(i+9)-.5)*14}deg)`; e.onclick=()=>zoom(u.f,u.n); c.append(e); });
+  }catch(e){ if(salaAct===id) cuerpo.innerHTML=`<iframe src="${s.embed}" title="${s.nombre}"></iframe>`; }
+}
+function abrir(s){
+  document.body.classList.add('en-sala');
+  foco=document.activeElement; $('#mt').textContent=s.nombre; tocar('sala');
+  visitadas.add(s.id); ls('edgar-visitadas',[...visitadas]);
+  items.forEach((it,i)=>{ if(SECCIONES[i].id===s.id) it.sala.classList.add('visitada'); });
+  const pn=modal.querySelector('.panel'); pn.dataset.tema=s.tema||''; pn.style.setProperty('--rasgado',desgarre()); salaAct=s.id;
+  if(s.lector){ cuerpo.innerHTML=''; montarLector(cuerpo,s); }
+  else if(s.texto) montarTexto(s);
+  else if(s.creditos) montarCreditos();
+  else if(s.mapa) montarPlanos(s);
+  else if(s.galeria) galeria(s);
+  else if(s.arena) collage(s);
+  else if(s.embed) cuerpo.innerHTML=`<div class="mon"><div class="monitor"><iframe src="${s.embed}" title="${s.nombre}" allowfullscreen allow="fullscreen; autoplay"></iframe></div><a class="fuera" href="${s.enlace}" target="_blank" rel="noopener">abrir en itch.io</a></div>`;
+  else if(s.enlace){ const it=s.enlace.includes('itch.io'); cuerpo.innerHTML=`<div class="vacio"><div><a class="boton" href="${s.enlace}" target="_blank" rel="noopener">Abrir en ${it?'itch.io':'Are.na'}</a><small>${it?'Aquí se incrustará el juego.':'Aquí se mostrará el tablero.'}</small></div></div>`; }
+  else cuerpo.innerHTML=`<div class="vacio">Esta sala todavía está cerrada.</div>`;
+  modal.classList.add('on'); requestAnimationFrame(()=>modal.classList.add('vis')); $('#cerrar').focus();
+}
+function cerrar(){
+  document.body.classList.remove('en-sala'); if(abierto||fotoAb) arrancar();
+  modal.classList.remove('vis');
+  setTimeout(()=>{ modal.classList.remove('on'); cuerpo.innerHTML=''; },400);
+  foco&&foco.focus();
+}
+$('#cerrar').addEventListener('click',cerrar);
+modal.addEventListener('click',e=>{ if(e.target===modal) cerrar(); });
+addEventListener('keydown',e=>{
+  if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&modal.querySelector('.visor')&&!modal.querySelector('.zoom')){ modal.querySelector(e.key==='ArrowRight'?'#vsig':'#vant').click(); return; }
+  if(e.key==='Escape'){ const z=modal.querySelector('.zoom'); if(z){ z.remove(); return; } const vs=modal.querySelector('.visor'); if(vs){ vs.remove(); return; } modal.classList.contains('on') ? cerrar() : (abierto&&alternar(false), fotoAb&&alternarFoto(false)); }
+  if(e.key==='Tab' && modal.classList.contains('on')){
+    const f=[...modal.querySelectorAll('button,a'),...document.querySelectorAll('#musica button,#musica input')], i=f.indexOf(document.activeElement);
+    if(e.shiftKey&&i<=0){ e.preventDefault(); f.at(-1).focus(); } else if(!e.shiftKey&&i===f.length-1){ e.preventDefault(); f[0].focus(); }
+  }
+});
+
+/* ——— lector del manuscrito ——— */
+let CAPS=null;
+async function cargarCaps(){
+  if(CAPS) return CAPS;
+  const t=await (await fetch('assets/manuscrito.txt?'+Date.now())).text(); CAPS=[]; let cur;
+  for(const raw of t.split(/\r?\n/)){ const m=raw.match(/^#\s*(?:CAP[IÍ]TULO\s+(\d+)|(DEDICATORIA))/i);
+    if(m){ cur={n:m[2]?0:+m[1],p:[]}; CAPS.push(cur); } else if(cur&&raw.trim()) cur.p.push(raw.trim()); }
+  return CAPS;
+}
+async function montarLector(el,s){
+  el.innerHTML=`<div class="lector"><div class="lbar"><button id="li" aria-expanded="false">Índice</button><span class="sp"></span><button id="tmenos" aria-label="Reducir tamaño de letra">A−</button><button id="tmas" aria-label="Aumentar tamaño de letra">A+</button><span id="lc"></span><button id="la" aria-label="Capítulo anterior">‹</button><button id="ls" aria-label="Capítulo siguiente">›</button><a class="alt-pdf" href="${s.pdf}" target="_blank" rel="noopener">PDF</a></div><div class="lcuerpo"><div class="lindice" id="lx"></div><div class="ltexto" id="lt"></div></div></div>`;
+  const lt=$('#lt'), lx=$('#lx'); let caps;
+  try{ caps=await cargarCaps(); }catch(e){ lt.innerHTML='<p class="ev">No se pudo cargar el texto. Abre la web desde su dirección publicada.</p>'; return; }
+  let act=null, timer, nopc=0;
+  const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const html0=(p,primero)=>p==='***'?'<hr>':p[0]==='~'?'<p class="cen">'+esc(p.slice(1))+'</p>':(primero&&p.startsWith('—')&&p.length>2&&!p.includes('[['))?'<p class="d dc">—<span class="ci">'+esc(p[1])+'</span>'+esc(p.slice(2))+'</p>':'<p'+(p.startsWith('—')?' class="d"':'')+'>'+esc(p).replace(/\[\[(.+?)-&gt;(\d+)\]\]/g,'<a class="ir" data-n="$2">$1</a>')+'</p>';
+  const html=(p,primero)=>{ const m=p.match(/^\[\[(.+)->(\d+)\]\]$/);
+    return m?'<p class="opcion"><a class="ir" data-n="'+m[2]+'" style="--k:'+(nopc++%5)+'">'+esc(m[1])+'</a></p>':html0(p,primero); };
+  function marca(y){ ls('edgar-marca2',{n:act,y:y??lt.scrollTop}); }
+  function ir(n,push=true,y=0){
+    const c=caps.find(x=>x.n===n); if(!c) return;
+    act=n;
+    const k=caps.indexOf(c), sg=caps[k+1], sinLinks=!c.p.some(p=>p.includes('[['));
+    lt.innerHTML='<article'+(n===0?' class="dedic"':'')+'><h3>'+(n===0?'<small>dedicatoria</small>':'<small>capítulo</small>'+n)+'</h3>'+(c.p.length?c.p.map((p,i)=>html(p,i===0)).join(''):'<p class="ev">Este capítulo todavía no existe.</p>')
+      +(c.p.length&&sinLinks&&sg?'<p class="sig"><button data-n="'+sg.n+'">'+(n===0?'comenzar':'capítulo siguiente')+' →</button></p>':'')+'</article>';
+    lt.scrollTop=y; if(innerWidth<=720) lx.classList.remove('on'); marca(y); pintaIndice();
+    $('#lc').textContent=n===0?'Dedicatoria':n+' / '+caps.filter(x=>x.n>0).length;
+    $('#la').disabled=k<=0; $('#ls').disabled=k>=caps.length-1;
+  }
+  lt.addEventListener('click',e=>{ const a=e.target.closest('[data-n]'); if(a) ir(+a.dataset.n); });
+  lt.addEventListener('scroll',()=>{ clearTimeout(timer); timer=setTimeout(()=>marca(),400); });
+  const tam=d=>{ ti=Math.min(TAMS.length-1,Math.max(0,ti+d)); ls('edgar-tam',ti); aplicaTam(); $('#tmenos').disabled=ti===0; $('#tmas').disabled=ti===TAMS.length-1; };
+  $('#tmenos').onclick=()=>tam(-1); $('#tmas').onclick=()=>tam(1); tam(0);
+  $('#la').onclick=()=>{ const i=caps.findIndex(x=>x.n===act); ir(caps[i-1].n); };
+  $('#ls').onclick=()=>{ const i=caps.findIndex(x=>x.n===act); ir(caps[i+1].n); };
+  lx.innerHTML='<ul>'+caps.map(c=>'<li><button data-n="'+c.n+'"'+(c.p.length?'':' class="vacio"')+'>'+(c.n===0?'Dedicatoria':'Capítulo '+c.n)+'<i></i>'+(c.p.length?'':' · en escritura')+'</button></li>').join('')+'</ul>';
+  function pintaIndice(){ lx.querySelectorAll('button').forEach(b=>{ const on=+b.dataset.n===act; b.classList.toggle('act',on); b.querySelector('i').textContent=on?'●':''; }); }
+  $('#li').onclick=()=>{ lx.classList.toggle('on'); $('#li').setAttribute('aria-expanded',lx.classList.contains('on')); };
+  lx.addEventListener('click',e=>{ const b=e.target.closest('button[data-n]'); if(b) ir(+b.dataset.n); });
+  const m=ls('edgar-marca2'); m&&caps.find(x=>x.n===m.n) ? ir(m.n,false,m.y||0) : ir(caps[0].n,false);
+}
+
+/* ——— efectos y cursor de luz ——— */
+$('#sfxb').addEventListener('click',e=>{ sfx=!sfx; e.currentTarget.setAttribute('aria-pressed',!sfx); $('#ondas').style.opacity=sfx?1:0; });
+
+/* ——— grano de película ——— */
+const g=$('#grano'), c=g.getContext('2d'), cuadros=[]; let tg;
+function hacer(){ const im=c.createImageData(g.width,g.height), d=new Uint32Array(im.data.buffer);
+  for(let i=0;i<d.length;i++){ const v=Math.random(); d[i]=v>.55?(((v-.55)*60|0)<<24)|0xC4D3D8:0; } return im; }
+function dimGrano(){ g.width=Math.ceil(innerWidth/3); g.height=Math.ceil(innerHeight/3); cuadros.length=0; for(let k=0;k<6;k++) cuadros.push(hacer()); ruido(true); }
+function ruido(f){
+  if(!f&&(document.hidden||body.classList.contains('en-sala'))) return;
+  c.putImageData(cuadros[Math.random()*cuadros.length|0],0,0);
+  for(let k=Math.random()*3|0;k--;){ c.fillStyle='rgba(216,211,196,.22)'; c.fillRect(Math.random()*g.width,Math.random()*g.height,1+(Math.random()*2|0),1+(Math.random()*2|0)); }
+}
+dimGrano(); addEventListener('resize',()=>{ clearTimeout(tg); tg=setTimeout(dimGrano,250); });
+if(!quieto) setInterval(ruido,140);
+
+/* ——— música (YouTube IFrame API) ——— */
+let yt, listo=false, quiere=false, sonando=false, fallos=0;
+const web = location.protocol.startsWith('http');
+if(!web){ $('#tp').textContent='la música suena al publicar la web'; $('#musica').title='YouTube solo funciona desde una dirección web (http), no desde file://'; }
+const tag=document.createElement('script'); tag.src='https://www.youtube.com/iframe_api'; document.head.append(tag);
+window.onYouTubeIframeAPIReady=()=>{
+  const vars={listType:'playlist',list:PLAYLIST_ID,controls:0,playsinline:1,rel:0,modestbranding:1,enablejsapi:1};
+  if(web) vars.origin=location.origin;
+  yt=new YT.Player('yt',{height:'200',width:'200',playerVars:vars,events:{
+    onReady:()=>{ listo=true; yt.setVolume(+$('#vol').value); yt.setLoop(true); yt.setShuffle(true); try{ yt.setPlaybackQuality('tiny'); }catch(e){} if(quiere) reproducir(true); },
+    onStateChange:e=>{ sonando=e.data===YT.PlayerState.PLAYING; pintar();
+      if(sonando){ const t=yt.getVideoData&&yt.getVideoData().title; if(t) $('#tp').textContent=t; } },
+    onError:e=>{ if([100,101,150].includes(e.data) && fallos++<14) setTimeout(()=>yt.nextVideo(),400);
+      else if(web) $('#tp').textContent='YouTube no pudo reproducir esta pista (error '+e.data+')'; }
+  }});
+};
+let primera=true;
+function reproducir(v){
+  quiere=v; if(!listo) return;
+  if(v && primera){ primera=false; yt.setShuffle(true); const n=(yt.getPlaylist()||[]).length||14; yt.playVideoAt(Math.floor(Math.random()*n)); }
+  else v?yt.playVideo():yt.pauseVideo();
+}
+function pintar(){
+  $('#ico').innerHTML=sonando?'<path d="M3 2h4v12H3zM9 2h4v12H9z"/>':'<path d="M4 2l10 6-10 6z"/>';
+  $('#play').setAttribute('aria-label',sonando?'Pausar música':'Reproducir música');
+}
+$('#play').addEventListener('click',()=>{ musicaIniciada=true; reproducir(!sonando); });
+$('#next').addEventListener('click',()=>{ musicaIniciada=true; listo&&yt.nextVideo(); });
+$('#prev').addEventListener('click',()=>{ musicaIniciada=true; listo&&yt.previousVideo(); });
+$('#vol').addEventListener('input',e=>{ listo&&yt.setVolume(+e.target.value); });
+</script>
+</body>
+</html>
