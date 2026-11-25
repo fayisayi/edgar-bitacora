@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Edgar · bitácora</title>
-<meta name="description" content="Bitácora interactiva de «Edgar», una novela corta sobre las personas que hemos perdido.">
+<meta name="description" content="Bitácora interactiva de «Edgar», novela corta de David Fayad. Tesis de la Maestría en Creación Literaria y Narrativas Digitales, Universidad Icesi.">
 <meta name="theme-color" content="#0F0F0D">
 <meta property="og:type" content="website"><meta property="og:title" content="Edgar · bitácora de una novela">
 <meta property="og:description" content="Bitácora interactiva de «Edgar», novela corta de David Fayad. Tesis de la Maestría en Creación Literaria y Narrativas Digitales, Universidad Icesi.">
-<meta property="og:image" content="https://fayisayi.github.io/edgar-bitacora/assets/og.jpg"><meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="assets/og.jpg"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230F0F0D'/%3E%3Ctext x='32' y='46' font-size='44' text-anchor='middle' fill='%23D8D3C4' font-family='serif'%3EE%3C/text%3E%3C/svg%3E">
 <link rel="preload" as="image" href="assets/teatro.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -99,7 +99,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .lbar #la,.lbar #ls{font-size:2rem;line-height:1;letter-spacing:0;padding:.2rem 1.2rem}
 .lbar #lc{font-size:.85rem;margin-right:.5rem}
 .lindice button{font-size:1.15rem;padding:1rem .6rem}
-.ltexto{position:relative;scrollbar-width:thin;scrollbar-color:#3a372f transparent}
+.ltexto{position:relative;scrollbar-width:thin;scrollbar-color:rgba(216,211,196,.45) rgba(216,211,196,.07)}
 .ltexto article{font:1.08rem/1.95 var(--cuerpo);color:#cdc8b8;hyphens:auto}
 .ltexto h3{margin:2rem 0 3rem}
 .ltexto h3 small{display:block;font:.7rem var(--cuerpo);letter-spacing:.4em;color:var(--ceniza);margin-bottom:.6rem}
@@ -173,6 +173,12 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .ltexto p.cen{text-indent:0;text-align:center;margin:.15em 0;letter-spacing:.05em}
 .ltexto .dedic h3{margin:3rem 0 2rem;font-size:1rem}
 .ltexto .dedic p.cen{margin:1.5rem 0;font-size:1.12em;color:#d8d3c4;letter-spacing:0}
+/* barras de scroll visibles */
+.ltexto::-webkit-scrollbar,.lindice::-webkit-scrollbar,.gal::-webkit-scrollbar,.col::-webkit-scrollbar{width:10px;height:10px}
+.ltexto::-webkit-scrollbar-track,.lindice::-webkit-scrollbar-track,.gal::-webkit-scrollbar-track,.col::-webkit-scrollbar-track{background:rgba(216,211,196,.07)}
+.ltexto::-webkit-scrollbar-thumb,.lindice::-webkit-scrollbar-thumb,.gal::-webkit-scrollbar-thumb,.col::-webkit-scrollbar-thumb{background:rgba(216,211,196,.45);border-radius:5px}
+.ltexto::-webkit-scrollbar-thumb:hover,.lindice::-webkit-scrollbar-thumb:hover{background:rgba(216,211,196,.7)}
+.ltexto,.lindice,.gal,.col{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 /* ——— lector: índice lateral y elecciones ——— */
 .lbar{text-transform:none}
 .lcuerpo{flex:1;min-height:0;display:flex;position:relative}
@@ -261,7 +267,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   .lbar{flex-wrap:wrap;gap:.1rem}
   .lbar button,.lbar .alt-pdf{padding:.6rem .8rem}
   .modal{padding:0 0 76px}
-  .panel{width:100vw;height:100%}
+  .panel{width:100vw;height:calc(100vh - 76px);height:calc(100dvh - 76px)}
   .musica .tp{display:none}
 }
 @media (prefers-reduced-motion:reduce){.edificio,.niebla,.parpadeo{animation:none}}
@@ -311,7 +317,7 @@ const SECCIONES = [
       'Aun así, esta es una novela que fue (y sigue siendo en espíritu) un videojuego, escrita por alguien que se identifica primero como diseñador de juegos que como escritor. Intenté dentro del afán de escribirla preservar en ella uno que otro principio de la exploración del espacio, la interacción con objetos y la agencia narrativa propia de los videojuegos.',
       'Gracias por leerla.'],
     firma:'David Fayad — 2026'},
-  {id:'experim',    nombre:'Experimentación interactiva',    embed:'https://itch.io/embed-upload/17721607?color=333333', enlace:'https://fayadgames.itch.io/edgar-test', tema:'monitor'},
+  {id:'experim',    nombre:'Experimentación interactiva',    soloPC:true, embed:'https://itch.io/embed-upload/17721607?color=333333', enlace:'https://fayadgames.itch.io/edgar-test', tema:'monitor'},
   {id:'planos',     nombre:'Planos del teatro',  mapa:true, tema:'mesa',
     general:{src:'assets/planos/teatro.webp',titulo:'Teatro San Fernando',foto:'assets/planos/foto-exterior.png'},
     zonas:[   // foto: una ruta o una lista de rutas (vacío = espacio reservado)
@@ -346,6 +352,7 @@ const stage=$('#stage'), img=$('#img'), btn=$('#edificio'), capa=$('#capa');
 const ls=(k,v)=>{ try{ if(v===undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k,JSON.stringify(v)); }catch(e){ return null; } };
 const TAMS=[.95,1.08,1.22,1.38,1.55]; let ti=ls('edgar-tam'); ti=Number.isInteger(ti)&&ti>=0&&ti<TAMS.length?ti:1;
 const aplicaTam=()=>document.documentElement.style.setProperty('--tam',TAMS[ti]+'rem'); aplicaTam();
+const esMovil=()=>matchMedia('(pointer:coarse)').matches||innerWidth<=720;
 const visitadas=new Set(ls('edgar-visitadas')||[]);
 let sfx=true; const snd={};
 function tocar(n){ if(!sfx) return; try{ const a=snd[n]??=new Audio('assets/'+n+'.wav'); a.volume=.5; a.currentTime=0; a.play().catch(()=>{}); }catch(e){} }
@@ -533,6 +540,7 @@ function abrir(s){
   else if(s.mapa) montarPlanos(s);
   else if(s.galeria) galeria(s);
   else if(s.arena) collage(s);
+  else if(s.embed&&s.soloPC&&esMovil()) cuerpo.innerHTML='<div class="vacio"><div>Este juego solo está disponible en computador.<small>Ábrelo desde un computador para jugarlo.</small></div></div>';
   else if(s.embed) cuerpo.innerHTML=`<div class="mon"><div class="monitor"><iframe src="${s.embed}" title="${s.nombre}" allowfullscreen allow="fullscreen; autoplay"></iframe></div><a class="fuera" href="${s.enlace}" target="_blank" rel="noopener">abrir en itch.io</a></div>`;
   else if(s.enlace){ const it=s.enlace.includes('itch.io'); cuerpo.innerHTML=`<div class="vacio"><div><a class="boton" href="${s.enlace}" target="_blank" rel="noopener">Abrir en ${it?'itch.io':'Are.na'}</a><small>${it?'Aquí se incrustará el juego.':'Aquí se mostrará el tablero.'}</small></div></div>`; }
   else cuerpo.innerHTML=`<div class="vacio">Esta sala todavía está cerrada.</div>`;
